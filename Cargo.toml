@@ -1,0 +1,18 @@
+[workspace]
+resolver = "2"
+members = [
+    "hyperbase-mqtt-lib",
+    "hyperbase-mqtt-pub-cli",
+    "hyperbase-mqtt-sub-cli",
+]
+
+[workspace.dependencies]
+hyperbase-mqtt-lib = { path = "./hyperbase-mqtt-lib" }
+
+tokio = { version = "1", features = ["rt-multi-thread", "fs"] }
+clap = { version = "4", features = ["derive"] }
+rumqttc = "0.24"
+ahash = "0.8"
+uuid = { version = "1", features = ["v7", "fast-rng", "serde"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1" }

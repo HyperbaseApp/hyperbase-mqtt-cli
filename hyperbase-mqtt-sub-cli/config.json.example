@@ -1,0 +1,6 @@
+{
+    "host": "103.186.31.38",
+    "port": 51883,
+    "topic": "hyperbase-scylla",
+    "mqtt_version": "v5"
+}

@@ -1,0 +1,14 @@
+[package]
+name = "hyperbase-mqtt-pub-cli"
+version = "0.1.1"
+edition = "2021"
+
+[dependencies]
+hyperbase-mqtt-lib = { workspace = true }
+
+tokio = { workspace = true }
+clap = { workspace = true }
+rumqttc = { workspace = true }
+uuid = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
