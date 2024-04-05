@@ -30,7 +30,7 @@ async fn main() {
     let config = serde_json::from_str::<Config>(&file_content).unwrap();
 
     let mut mqtt_version = MqttVersion::V5;
-    if let Some(v) = config.mqtt_version {
+    if let Some(v) = config.broker.mqtt_version {
         if v.to_lowercase() == "v3" {
             mqtt_version = MqttVersion::V3
         }
@@ -55,14 +55,17 @@ async fn main() {
 
     match mqtt_version {
         MqttVersion::V3 => {
-            let mqtt_options_v3 = MqttOptions::new(Uuid::now_v7(), &config.host, config.port);
+            let mut mqtt_options_v3 =
+                MqttOptions::new(Uuid::now_v7(), &config.broker.host, config.broker.port);
+            mqtt_options_v3.set_credentials(&config.broker.token_id, &config.broker.token);
+
             let (client, mut eventloop) = AsyncClient::new(mqtt_options_v3, 10);
 
             task::spawn(async move {
                 for _ in 0..count {
                     if let Err(err) = client
                         .publish(
-                            &config.topic,
+                            &config.broker.topic,
                             mqttbytes::QoS::AtMostOnce,
                             false,
                             payload_string.clone(),
@@ -71,7 +74,7 @@ async fn main() {
                     {
                         eprintln!(
                             "Err: Failed to publish to mqtt broker v3 {}:{} with payload {}",
-                            config.host, config.port, payload_string
+                            config.broker.host, config.broker.port, payload_string
                         );
                         eprintln!("Err Msg: {err}");
                         return;
@@ -81,35 +84,48 @@ async fn main() {
             });
 
             let mut published_count = 0;
-            while let Ok(event) = eventloop.poll().await {
-                match event {
-                    Event::Incoming(packet) => {
-                        println!("Incoming = {packet:?}")
-                    }
-                    Event::Outgoing(outgoing) => {
-                        if let Outgoing::Publish(_) = outgoing {
-                            published_count += 1;
-                            println!("Publish {published_count}");
-                            if published_count == count {
-                                println!("Successfully published all data");
-                                break;
-                            }
-                        } else {
-                            println!("Outgoing = {outgoing:?}");
+            loop {
+                match eventloop.poll().await {
+                    Ok(event) => match event {
+                        Event::Incoming(packet) => {
+                            println!("Incoming = {packet:?}")
                         }
+                        Event::Outgoing(outgoing) => {
+                            if let Outgoing::Publish(_) = outgoing {
+                                published_count += 1;
+                                println!("Publish {published_count}");
+                                if published_count == count {
+                                    println!("Successfully published all data");
+                                    break;
+                                }
+                            } else {
+                                println!("Outgoing = {outgoing:?}");
+                            }
+                        }
+                    },
+                    Err(err) => {
+                        eprintln!(
+                            "Err: Failed to polling mqtt broker using token_id '{}' and token '{}'",
+                            config.broker.token_id, config.broker.token
+                        );
+                        eprintln!("Err Msg: {err}");
+                        return;
                     }
                 }
             }
         }
         MqttVersion::V5 => {
-            let mqtt_options_v5 = v5::MqttOptions::new(Uuid::now_v7(), &config.host, config.port);
+            let mut mqtt_options_v5 =
+                v5::MqttOptions::new(Uuid::now_v7(), &config.broker.host, config.broker.port);
+            mqtt_options_v5.set_credentials(&config.broker.token_id, &config.broker.token);
+
             let (client, mut eventloop) = v5::AsyncClient::new(mqtt_options_v5, 10);
 
             task::spawn(async move {
                 for _ in 0..count {
                     if let Err(err) = client
                         .publish(
-                            &config.topic,
+                            &config.broker.topic,
                             v5::mqttbytes::QoS::AtMostOnce,
                             false,
                             payload_string.clone(),
@@ -118,7 +134,7 @@ async fn main() {
                     {
                         eprintln!(
                             "Err: Failed to publish to mqtt broker v5 {}:{} with payload {}",
-                            config.host, config.port, payload_string
+                            config.broker.host, config.broker.port, payload_string
                         );
                         eprintln!("Err Msg: {err}");
                         return;
@@ -128,22 +144,32 @@ async fn main() {
             });
 
             let mut published_count = 0;
-            while let Ok(event) = eventloop.poll().await {
-                match event {
-                    v5::Event::Incoming(packet) => {
-                        println!("Incoming = {packet:?}")
-                    }
-                    v5::Event::Outgoing(outgoing) => {
-                        if let Outgoing::Publish(_) = outgoing {
-                            published_count += 1;
-                            println!("Publish {published_count}");
-                            if published_count == count {
-                                println!("Successfully published all data");
-                                break;
-                            }
-                        } else {
-                            println!("Outgoing = {outgoing:?}");
+            loop {
+                match eventloop.poll().await {
+                    Ok(event) => match event {
+                        v5::Event::Incoming(packet) => {
+                            println!("Incoming = {packet:?}")
                         }
+                        v5::Event::Outgoing(outgoing) => {
+                            if let Outgoing::Publish(_) = outgoing {
+                                published_count += 1;
+                                println!("Publish {published_count}");
+                                if published_count == count {
+                                    println!("Successfully published all data");
+                                    break;
+                                }
+                            } else {
+                                println!("Outgoing = {outgoing:?}");
+                            }
+                        }
+                    },
+                    Err(err) => {
+                        eprintln!(
+                            "Err: Failed to polling mqtt broker using token_id '{}' and token '{}'",
+                            config.broker.token_id, config.broker.token
+                        );
+                        eprintln!("Err Msg: {err}");
+                        return;
                     }
                 }
             }

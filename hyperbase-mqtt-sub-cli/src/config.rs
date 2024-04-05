@@ -1,9 +1,8 @@
+use hyperbase_mqtt_lib::{broker::Broker, payload::Payload};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
 pub struct Config {
-    pub host: String,
-    pub port: u16,
-    pub topic: String,
-    pub mqtt_version: Option<String>,
+    pub broker: Broker,
+    pub payload: Payload,
 }
