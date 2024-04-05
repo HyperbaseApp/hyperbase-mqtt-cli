@@ -8,10 +8,9 @@ pub struct Payload {
     project_id: Uuid,
 
     token_id: Uuid,
-    token: String,
     user: Option<UserPayload>,
 
-    collection_id: Uuid,
+    pub collection_id: Uuid,
     data: Option<HashMap<String, Value>>,
 }
 

@@ -1,11 +1,15 @@
 {
-    "host": "103.186.31.38",
-    "port": 51883,
-    "topic": "hyperbase-scylla",
+    "broker": {
+        "host": "103.186.31.38",
+        "port": 51883,
+        "topic": "hyperbase-scylla",
+        "token_id": "de8c1682-f546-4348-b3d3-552135ebc2cd",
+        "token": "P3azdYgEw53XFZGsCAvn6Btojy6mC6R3uEm6tGtDkM",
+        "mqtt_version": "v5"
+    },
     "payload": {
         "project_id": "de8c1682-f546-4348-b3d3-552135ebc2cd",
         "token_id": "de8c1682-f546-4348-b3d3-552135ebc2cd",
-        "token": "P3azdYgEw53XFZGsCAvn6Btojy6mC6R3uEm6tGtDkM",
         "device": {
             "collection_id": "de8c1682-f546-4348-b3d3-552135ebc2cd",
             "id": "de8c1682-f546-4348-b3d3-552135ebc2cd"
@@ -18,6 +22,5 @@
         }
     },
     "count": 10,
-    "delay": 1,
-    "mqtt_version": "v5"
+    "delay": 1
 }
